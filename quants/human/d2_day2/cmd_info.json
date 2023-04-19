@@ -1,0 +1,9 @@
+{
+    "salmon_version": "1.10.1",
+    "index": "../../indexes/gencode.v43.transcripts_index",
+    "libType": "A",
+    "unmatedReads": "SRR8514733.fastq",
+    "threads": "8",
+    "output": "../../quants/human/d2_day2/",
+    "auxDir": "aux_info"
+}

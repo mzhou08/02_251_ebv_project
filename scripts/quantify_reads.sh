@@ -18,21 +18,19 @@ do
     cd d${donor}_day${days[$day]}; 
     srr_number=$((8514718 + ($day + ($donor*7))))
 
-
-
     # quantify against human transcripts
-#    salmon quant -i ../../indexes/gencode.v43.transcripts_index \
-#	    -l A -r SRR${srr_number}.fastq \
-#	    -p 8 -o ../../quants/human/d${donor}_day${days[$day]}/
+    salmon quant -i ../../indexes/gencode.v43.transcripts_index \
+	    -l A -r SRR${srr_number}.fastq \
+	    -p 8 -o ../../quants/human/d${donor}_day${days[$day]}/
 
-#    echo "quantified against human transcripts"
+    echo "quantified against human transcripts"
 
     # quantify against ebv akata transcripts
-#    salmon quant -i ../../indexes/ebv_akata_index \
-#	    -l A -r SRR${srr_number}.fastq \
-#	    -p 8 -o ../../quants/ebv_akata/d${donor}_day${days[$day]}/
+    salmon quant -i ../../indexes/ebv_akata_index \
+	    -l A -r SRR${srr_number}.fastq \
+	    -p 8 -o ../../quants/ebv_akata/d${donor}_day${days[$day]}/
 
-#    echo "quantified against EBV-akata"
+    echo "quantified against EBV-akata"
 
     # quantify against ebv mutu transcripts
     salmon quant -i ../../indexes/ebv_mutu_index \

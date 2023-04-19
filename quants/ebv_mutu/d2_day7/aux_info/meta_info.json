@@ -38,13 +38,13 @@
     "index_decoy_name_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "num_bootstraps": 0,
     "num_processed": 14307111,
-    "num_mapped": 53806,
+    "num_mapped": 53805,
     "num_decoy_fragments": 0,
     "num_dovetail_fragments": 0,
     "num_fragments_filtered_vm": 2447,
     "num_alignments_below_threshold_for_mapped_fragments_vm": 4510,
-    "percent_mapped": 0.3760787205746849,
+    "percent_mapped": 0.37607173104339516,
     "call": "quant",
-    "start_time": "Wed Apr 19 15:04:13 2023",
-    "end_time": "Wed Apr 19 15:04:23 2023"
+    "start_time": "Wed Apr 19 17:29:21 2023",
+    "end_time": "Wed Apr 19 17:29:29 2023"
 }

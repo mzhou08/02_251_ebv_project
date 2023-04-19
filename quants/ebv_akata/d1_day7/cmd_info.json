@@ -1,0 +1,9 @@
+{
+    "salmon_version": "1.10.1",
+    "index": "../../indexes/ebv_akata_index",
+    "libType": "A",
+    "unmatedReads": "SRR8514728.fastq",
+    "threads": "8",
+    "output": "../../quants/ebv_akata/d1_day7/",
+    "auxDir": "aux_info"
+}
