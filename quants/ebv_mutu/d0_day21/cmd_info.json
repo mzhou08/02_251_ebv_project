@@ -1,6 +1,6 @@
 {
     "salmon_version": "1.10.1",
-    "index": "../../indexes/ebv_mutu_sequence",
+    "index": "../../indexes/ebv_mutu_index",
     "libType": "A",
     "unmatedReads": "SRR8514723.fastq",
     "threads": "8",

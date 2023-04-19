@@ -1,9 +1,9 @@
-[2023-04-18 21:22:42.401] [jointLog] [info] setting maxHashResizeThreads to 8
-[2023-04-18 21:22:42.401] [jointLog] [info] Fragment incompatibility prior below threshold.  Incompatible fragments will be ignored.
-[2023-04-18 21:22:42.401] [jointLog] [info] Usage of --validateMappings implies use of minScoreFraction. Since not explicitly specified, it is being set to 0.65
-[2023-04-18 21:22:42.401] [jointLog] [info] Setting consensusSlack to selective-alignment default of 0.35.
-[2023-04-18 21:22:42.401] [jointLog] [info] parsing read library format
-[2023-04-18 21:22:42.401] [jointLog] [info] There is 1 library.
-[2023-04-18 21:22:42.402] [jointLog] [info] Loading pufferfish index
-[2023-04-18 21:22:42.402] [jointLog] [info] Loading dense pufferfish index.
-[2023-04-18 21:22:42.409] [jointLog] [info] done
+[2023-04-19 15:02:39.055] [jointLog] [info] setting maxHashResizeThreads to 8
+[2023-04-19 15:02:39.055] [jointLog] [info] Fragment incompatibility prior below threshold.  Incompatible fragments will be ignored.
+[2023-04-19 15:02:39.055] [jointLog] [info] Usage of --validateMappings implies use of minScoreFraction. Since not explicitly specified, it is being set to 0.65
+[2023-04-19 15:02:39.055] [jointLog] [info] Setting consensusSlack to selective-alignment default of 0.35.
+[2023-04-19 15:02:39.055] [jointLog] [info] parsing read library format
+[2023-04-19 15:02:39.055] [jointLog] [info] There is 1 library.
+[2023-04-19 15:02:39.055] [jointLog] [info] Loading pufferfish index
+[2023-04-19 15:02:39.056] [jointLog] [info] Loading dense pufferfish index.
+[2023-04-19 15:02:39.064] [jointLog] [info] done
