@@ -1,0 +1,9 @@
+{
+    "salmon_version": "1.10.1",
+    "index": "../../indexes/ebv_mutu_sequence",
+    "libType": "A",
+    "unmatedReads": "SRR8514725.fastq",
+    "threads": "8",
+    "output": "../../quants/ebv_mutu/d1_day0/",
+    "auxDir": "aux_info"
+}

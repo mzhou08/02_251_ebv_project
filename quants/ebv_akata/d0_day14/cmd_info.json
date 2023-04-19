@@ -1,0 +1,9 @@
+{
+    "salmon_version": "1.10.1",
+    "index": "../../indexes/ebv_akata_sequence",
+    "libType": "A",
+    "unmatedReads": "SRR8514722.fastq",
+    "threads": "8",
+    "output": "../../quants/ebv_akata/d0_day14/",
+    "auxDir": "aux_info"
+}

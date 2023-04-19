@@ -1,0 +1,9 @@
+[2023-04-18 21:22:39.219] [jointLog] [info] setting maxHashResizeThreads to 8
+[2023-04-18 21:22:39.219] [jointLog] [info] Fragment incompatibility prior below threshold.  Incompatible fragments will be ignored.
+[2023-04-18 21:22:39.220] [jointLog] [info] Usage of --validateMappings implies use of minScoreFraction. Since not explicitly specified, it is being set to 0.65
+[2023-04-18 21:22:39.220] [jointLog] [info] Setting consensusSlack to selective-alignment default of 0.35.
+[2023-04-18 21:22:39.220] [jointLog] [info] parsing read library format
+[2023-04-18 21:22:39.222] [jointLog] [info] There is 1 library.
+[2023-04-18 21:22:39.224] [jointLog] [info] Loading pufferfish index
+[2023-04-18 21:22:39.225] [jointLog] [info] Loading dense pufferfish index.
+[2023-04-18 21:22:41.352] [jointLog] [info] done
