@@ -77,11 +77,19 @@ library(AnnotationHub)
 setwd("/Users/acavet/Desktop/ebv_project/")
 
 # which genome
-curr_genome <- "ebv_akata"
+# human, ebv_mutu, ebv_akata
+curr_genome <- "ebv_mutu"
 
 # List all files, then filter to just quant file names and paths 
 all_files <- list.files(path = paste("./quants/", curr_genome, sep=""), recursive = TRUE, full.names = TRUE)
 quant_files <- all_files[grep("quant.sf$", all_files)]
+quant_files
+
+# if ebv genome, d0_day0 all NaN, so remove!!!!
+if (curr_genome != "human") {
+  quant_files <- quant_files[-grep("d0_day0", all_files)]
+  #quant_files <- quant_files[grep("day0", quant_files, invert=TRUE)]
+}
 quant_files
 
 # label each quant file by sample
@@ -89,6 +97,7 @@ named_quants <- quant_files
 names(named_quants) <- str_replace(quant_files, paste("./quants/",curr_genome,"/",sep=""), "") %>% 
   str_replace("/quant.sf", "")
 named_quants
+
 
 
 # # Connect to the AnnotationHub database
@@ -137,6 +146,8 @@ attributes(txi)
 # view counts
 txi$counts %>% View()
 
+
+
 # write counts to an object
 data <- txi$counts %>%
   round() %>%
@@ -177,16 +188,18 @@ txi_metadata
 
 # Construct deseq dataset from the txi object and sample inforation
 library("DESeq2")
+
 # Remove any NA values
-txi <- na.omit(txi)
+# txi <- na.omit(txi)
+
 # txi = txi[complete.cases(txi), ]
 ddsTxi <- DESeqDataSetFromTximport(txi,
                                    colData = txi_metadata,
                                    design = ~ day) # ?? TODO choose factors
 ddsTxi
 
-# Remove any NA values
-ddsTxi <- na.omit(ddsTxi)
+# # Remove any NA values
+# ddsTxi <- na.omit(ddsTxi)
 
 # As in the paper, we only keep genes with at least 20 expression counts
 keep <- rowSums(counts(ddsTxi)) >= 20
@@ -211,37 +224,58 @@ ddsDone <- DESeq(ddsTxi)
 days_versus_0 = resultsNames(ddsDone)
 days_versus_0
 # "day_14_vs_0" "day_2_vs_0"  "day_21_vs_0" "day_28_vs_0" "day_4_vs_0" "day_7_vs_0"
-
+day_cmp <- "day_14_vs_0"
 
 for (day_cmp in days_versus_0) {
+  save_path <- paste("./DESeq2_results/",curr_genome,"/",curr_genome,"_",day_cmp,sep="")
+  
   # For each day compared with 0, save genes with <0.01 p values to dataframe and graph
-  resdays <- results(ddsDone, contrast=list(day_cmp))
+  # Apply bonferroni correction for p values
+  resdays <- results(ddsDone, contrast=list(day_cmp), pAdjustMethod="bonferroni")
   resdays
   
   # Show <0.01 p values
   no_na = resdays[complete.cases(resdays), ] # get rid of any rows with NAs
-  less_than_001 <- no_na[no_na$pvalue < 0.01, ]
+  less_than_001 <- no_na[no_na$padj < 0.01, ]
   less_than_001
+  
+  less_than_001_unadj <- no_na[no_na$pvalue < 0.01, ]
+  less_than_001_unadj
   
   #https://www.aaos.org/aaosnow/2012/apr/research/research7/
   
-  png_name <- paste("./DESeq2_results/",curr_genome,"_",day_cmp,"_count_vs_logfold.png",sep="")
+  png_name <- paste(save_path,"_count_vs_logfold.png",sep="")
   png(png_name)
   
   # Plot
-  plotMA(no_na, ylim=c(-5,5))
-  title(main =paste(curr_genome, " genes, ", day_cmp, sep=""))
+  # plotMA(no_na, ylim=c(-5,5))
+  # title(main =paste(curr_genome, " genes, ", day_cmp, sep=""))
+  
+  
+  # Different plot
+  plot(no_na$baseMean, no_na$log2FoldChange, main=paste(curr_genome, " genes, ", day_cmp, sep=""),
+       xlab="Gene Expression Mean", ylab="Log 2 Fold Change", pch = 20, cex = 1, col = alpha(1, 0.6), ylim=c(-30,30))
+  points(less_than_001$baseMean, less_than_001$log2FoldChange, pch = 20, cex = 1, col = alpha("red", 0.1), ylim=c(-30,30))
+  
   # Save plot
-  # dev.copy(png, png_name, width = 600, height = 400, res = 300)
   dev.off()
+  
+  getMethod("plotMA","DESeqDataSet")
   
   
   # Save to appropriate directories
-  write.csv(resdays, file = paste("./DESeq2_results/",curr_genome,"_",day_cmp,"_diffgeneexpr.csv",sep=""))
-  write.csv(less_than_001, file = paste("./DESeq2_results/",curr_genome,"_",day_cmp,"_diffgeneexpr_pval_lt01.csv",sep=""))
+  write.csv(resdays, file = paste(save_path,"_diffgeneexpr.csv",sep=""))
+  write.csv(less_than_001, file = paste(save_path,"_diffgeneexpr_pval_lt01.csv",sep=""))
   
   
   
+  
+  ## TODO:
+  # DID add new gene expression graphs with p value highligting
+  # DID add bonferroni
+  # DID figure out NaN, must change paper to reflect EBV compared day 0, NO SIG RESULTS
+  # find and add gene names
+  # save metadata: # up/down regulated, which days most up/down regulated, combine to see how many genes across all days
   
   
   # # Shrinkage of effect size (LFC estimates) ??
