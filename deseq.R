@@ -78,7 +78,7 @@ setwd("/Users/acavet/Desktop/ebv_project/")
 
 # which genome
 # human, ebv_mutu, ebv_akata
-curr_genome <- "ebv_mutu"
+curr_genome <- "human"
 
 # List all files, then filter to just quant file names and paths 
 all_files <- list.files(path = paste("./quants/", curr_genome, sep=""), recursive = TRUE, full.names = TRUE)
@@ -120,12 +120,18 @@ named_quants
 
 
 
+# FOR HUMAN: 
 # # Load the annotation/index table used for Salmon, so we can convert the gene
 # # labels in the "Name" column of the quant files back to gene info
-# tx2gene <- read.delim("tx2gene_grch38_ens94.txt")
+tx2gene_full <- read.delim("human_gene_labels.txt")
+tx2gene_full %>% View()
+# tx2gene_cropped <- tx2gene_full[c("Transcript.stable.ID", "Gene.stable.ID")]
+# names(tx2gene_cropped)[names(tx2gene_cropped) == "Transcript.Stable.ID"] <- "TXNAME"
+# names(tx2gene_cropped)[names(tx2gene_cropped) == "Gene.stable.ID"] <- "GENEID"
 # # this annotation table is a dataframe with columns transcript ID, gene ID, gene symbol
 # # tximport will use the first 2 cols to convert our quant info to the raw counts we need
-# tx2gene %>% View()
+# tx2gene_cropped %>% View()
+# https://bioconductor.org/packages/devel/bioc/vignettes/tximport/inst/doc/tximport.html
 
 
 ?tximport
@@ -226,22 +232,52 @@ days_versus_0
 # "day_14_vs_0" "day_2_vs_0"  "day_21_vs_0" "day_28_vs_0" "day_4_vs_0" "day_7_vs_0"
 day_cmp <- "day_14_vs_0"
 
+
+# Empty dataframes to merge all gene results into, 
+# one for all genes expressed (ie analyzed, their counts were kept in >= 20)
+# one for all genes with Bonferroni correct p value of less than 0.01 for diff exp
+results_index_df <- data.frame(results(ddsDone, contrast=list(day_cmp), pAdjustMethod="bonferroni"))
+all_days_v0 <- data.frame(matrix(nrow = nrow(results_index_df), ncol = 0))
+rownames(all_days_v0) <- rownames(results_index_df)
+all_days_v0$Transcript.stable.ID <- gsub("\\..*", "", row.names(all_days_v0))
+all_days_v0_significant <- all_days_v0
+all_days_v0_significant
+
 for (day_cmp in days_versus_0) {
   save_path <- paste("./DESeq2_results/",curr_genome,"/",curr_genome,"_",day_cmp,sep="")
   
   # For each day compared with 0, save genes with <0.01 p values to dataframe and graph
   # Apply bonferroni correction for p values
   resdays <- results(ddsDone, contrast=list(day_cmp), pAdjustMethod="bonferroni")
+  
+  # Add transcript id (currently the row names) as a column for merging
+  resdays$Transcript.stable.ID <- gsub("\\..*", "", row.names(resdays))
   resdays
   
   # Show <0.01 p values
   no_na = resdays[complete.cases(resdays), ] # get rid of any rows with NAs
   less_than_001 <- no_na[no_na$padj < 0.01, ]
   less_than_001
+  # less_than_001_unadj <- no_na[no_na$pvalue < 0.01, ]
+  # less_than_001_unadj
   
-  less_than_001_unadj <- no_na[no_na$pvalue < 0.01, ]
-  less_than_001_unadj
+  # Merge in all results + significant results to dfs based on transcript id,
+  # label columns with day vs day numbers
+  resdays_labeled <- data.frame(resdays)
+  names(resdays_labeled) <- paste0(names(data.frame(resdays)), "_", day_cmp)
+  names(resdays_labeled)[names(resdays_labeled) == paste("Transcript.stable.ID", "_", day_cmp, sep="")] <- "Transcript.stable.ID"
+  resdays_labeled
+  all_days_v0 <- merge(resdays_labeled, all_days_v0, by = "Transcript.stable.ID", all.x=TRUE)
   
+  less_than_001_labeled <- data.frame(less_than_001)
+  names(less_than_001_labeled) <- paste0(names(data.frame(less_than_001)), "_", day_cmp)
+  names(less_than_001_labeled)[names(less_than_001_labeled) == paste("Transcript.stable.ID", "_", day_cmp, sep="")] <- "Transcript.stable.ID"
+  less_than_001_labeled
+  all_days_v0_significant <- merge(less_than_001_labeled, all_days_v0_significant, by = "Transcript.stable.ID", all.x=TRUE)
+  
+  
+  
+
   #https://www.aaos.org/aaosnow/2012/apr/research/research7/
   
   png_name <- paste(save_path,"_count_vs_logfold.png",sep="")
@@ -274,7 +310,7 @@ for (day_cmp in days_versus_0) {
   # DID add new gene expression graphs with p value highligting
   # DID add bonferroni
   # DID figure out NaN, must change paper to reflect EBV compared day 0, NO SIG RESULTS
-  # find and add gene names
+   # DID find and add gene names http://useast.ensembl.org/index.html add to paper
   # save metadata: # up/down regulated, which days most up/down regulated, combine to see how many genes across all days
   
   
@@ -284,4 +320,37 @@ for (day_cmp in days_versus_0) {
   
   # plotMA(resLFC, ylim=c(-5,5))
 }
-  
+
+######################### Data finalizing and further analysis ###################### 
+
+all_days_v0
+all_days_v0_significant
+
+# Merge in gene information based on Ensemble transcript ID
+all_days_v0 <- merge(all_days_v0, tx2gene_full, by = "Transcript.stable.ID")
+all_days_v0_significant <- merge(all_days_v0_significant, tx2gene_full, by = "Transcript.stable.ID")
+
+# Save those results: all significances in diff gene expr versus day 0, plus all gene information
+all_days_v0_significant %>% View()
+write.csv(all_days_v0, file = "human_diffexpr_v_day0_genes.csv")
+write.csv(all_days_v0_significant, file = "human_diffexpr_v_day0_plt001_genes.csv")
+
+
+# Find gene names for those with majority of statistically sig gene changes log fold <0 vs >0 
+only_logfold_cols <- grep("^log2FoldChange", names(all_days_v0_significant), value = TRUE)
+only_logfold_cols <- grep("Intercept$", only_logfold_cols, value = TRUE, invert = TRUE)
+only_logfold_cols
+only_logfold_df <- all_days_v0_significant[only_logfold_cols]
+only_logfold_df[] <- lapply(only_logfold_df, as.numeric)
+only_logfold_df %>% View()
+only_logfold_df$"Transcript.stable.ID" <- all_days_v0_significant["Transcript.stable.ID"]
+only_logfold_df
+str(only_logfold_df)
+
+majority_sig_downregulated_rows <- apply(only_logfold_df, 1, function(row) sum(as.numeric(row) < 0, na.rm = TRUE) > sum(as.numeric(row), na.rm = TRUE)/2)
+majority_sig_upregulated_rows <- apply(only_logfold_df, 1, function(row) sum(as.numeric(row) > 0, na.rm = TRUE) > sum(as.numeric(row), na.rm = TRUE)/2)
+majority_sig_downregulated_rows
+majority_sig_upregulated_rows
+downreg_df <- only_logfold_df[majority_sig_downregulated_rows, ]
+upreg_df <- only_logfold_df[majority_sig_upregulated_rows, ]
+upreg_df %>% View()
